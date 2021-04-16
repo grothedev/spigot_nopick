@@ -8,11 +8,17 @@ CreatureSpawnEvent:
 
 EntityDamageEvent: cause()==Entity_Explosion&&?  -> setDamage() ~1/2
 
-PlayerFishEvent: getCaught()==Creeper -> explode()
-
 make config file with blocked items
 
+ChunkPopulateEvent or WorldInitEvent to generate world border
+
 ideas:
-  - creeper explode on fishing pole hook
+  - creeper explode on snowball
   - spawn chests of blocks
-  - concentric world borders per 1k
+  - shovel dirt has 20% chance of actually giving dirt
+
+
+  -1006, 1000. 1006,1000. 1006,1006. -1006,1006. T
+-1000,-1006. -1000,1006. -1006,1006. -1006,-1006.  L
+1006,-1000. -1006,-1000. -1006,-1006. 1006,-1006.  B
+1000,1006. 1000,-1006, 1006,-1006. 1006,1006. R
