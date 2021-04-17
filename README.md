@@ -24,3 +24,5 @@ ideas:
 1000,1006. 1000,-1006, 1006,-1006. 1006,1006. R
 
 Are you looking for something to make minecraft a little more interesting or challenging? If so, then this may be the server for you. There are a number of modifications that make the survival gamemode require a little more thought and creativity. You cannot craft pickaxes; how will you mine? You cannot make charcoal or plant saplings. Dirt and sandstone will not always give you usable material when shoveled. Is it possible to control creepers in any way? At spawn, there is a big hole that goes to the bottom of the world. You can not use buckets. 
+
+Complete list of features:

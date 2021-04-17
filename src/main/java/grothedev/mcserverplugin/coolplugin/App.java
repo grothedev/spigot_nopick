@@ -49,14 +49,12 @@ public class App extends JavaPlugin implements Listener
 {
 
     Configuration conf;
-    HashSet<Material> bannedItems;
     Random rand;
 
     @Override
     public void onEnable(){
         super.onEnable();
         saveDefaultConfig();
-        bannedItems = new HashSet<Material>();
         conf = getConfig();
         updateLocalConfig(conf);
         getServer().getPluginManager().registerEvents(this, this);
@@ -73,14 +71,14 @@ public class App extends JavaPlugin implements Listener
             //LivingEntity entity, Item item, int remaining){
         if (e.getEntityType() == EntityType.PLAYER && 
             isItemBanned(e.getItem())){
-            //TODO remove item
+            e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onCraftItemEvent(CraftItemEvent e){
         //Recipe r, InventoryView invView, InventoryType.SlotType type, int slot, ClickType c, InventoryAction a){
-        if (bannedItems.contains(e.getRecipe().getResult().getType())){
+        if (isItemBanned(e.getRecipe().getResult().getType())){
             e.setCancelled(true);
         }
     }
@@ -205,20 +203,7 @@ public class App extends JavaPlugin implements Listener
     }
 
     private Material getRandomStoneBlockMaterial(){
-        Material[] types = {
-            Material.CHISELED_POLISHED_BLACKSTONE,
-            Material.CHISELED_STONE_BRICKS,
-            Material.COBBLESTONE,
-            Material.CRACKED_STONE_BRICKS,
-            Material.CRACKED_POLISHED_BLACKSTONE_BRICKS,
-            Material.MOSSY_COBBLESTONE,
-            Material.MOSSY_STONE_BRICKS,
-            Material.POLISHED_ANDESITE,
-            Material.POLISHED_BLACKSTONE,
-            Material.POLISHED_DIORITE,
-            Material.POLISHED_BLACKSTONE_BRICKS,
-            Material.POLISHED_GRANITE
-        };
+        
         return types[rand.nextInt() % types.length];
     }
 
@@ -256,8 +241,9 @@ public class App extends JavaPlugin implements Listener
     }
 
     private boolean isItemBanned(Item item){
-        return (item.getItemStack().getType().toString().toLowerCase().contains("sapling") 
-                || bannedItems.contains(item.getItemStack())); 
+        //return (item.getItemStack().getType().toString().toLowerCase().contains("sapling") 
+        return (item.getItemStack().getType() instanceof Sapling
+        || Config.BANNED_ITEMS.contains(item.getItemStack())); 
     }
 
     private void updateLocalConfig(Configuration c){
