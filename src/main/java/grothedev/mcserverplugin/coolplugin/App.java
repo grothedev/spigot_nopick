@@ -6,6 +6,7 @@ import java.rmi.server.Skeleton;
 import java.util.HashSet;
 import java.util.Random;
 
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
@@ -33,6 +34,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.inventory.InventoryView;
@@ -105,6 +107,8 @@ public class App extends JavaPlugin implements Listener
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e){
         //Entity damagee, EntityDamageEvent.DamageCause cause, double damage){
         
+        getServer().broadcastMessage(e.getEntity() + "<*" + e.getDamager());
+
         if (e.getEntity() instanceof Player && e.getCause() == DamageCause.ENTITY_EXPLOSION){
             e.setDamage(e.getDamage()*.05f); //TODO cfg val
         } else if (e.getDamager().getType() == EntityType.SNOWBALL && e.getEntityType() == EntityType.CREEPER){
@@ -141,16 +145,25 @@ public class App extends JavaPlugin implements Listener
             }
         }
     }
-    
+
     @EventHandler
-    public void onChunkPopulateEvent(ChunkPopulateEvent e){
-        
+    public void onChunkLoadEvent(ChunkLoadEvent e){
+        //chunk coords are chunk-based, not block-based
+        if (e.isNewChunk()){
+            getServer().broadcastMessage(e.getChunk().getX() + ", " + e.getChunk().getZ());
+            if (chunkContainsWall(e.getChunk())){
+                //TODO
+            }
+        }
     }
-        
+    
+
+
     @EventHandler
     public void onBlockBreakEvent(BlockBreakEvent e){
         if (e.getBlock().getType() == Material.GRASS_BLOCK || e.getBlock().getType() == Material.DIRT){
-            e.setDropItems(rand.nextInt(100) < Config.DIRT_DROP_CHANCE*10);
+            e.setDropItems(rand.nextInt(100) < Config.DIRT_DROP_CHANCE*100);
+
         }
     }
 
@@ -248,6 +261,13 @@ public class App extends JavaPlugin implements Listener
     }
 
     private void updateLocalConfig(Configuration c){
+        Config.CREEPER_BLAST = Float.valueOf(getConfig().getString("creeper_blast_radius_multiplier"));
+        Config.DIRT_DROP_CHANCE = Float.valueOf(getConfig().getString("dirt_drop_chance"));
+        Config.SKELE_HP_MULT = Float.valueOf(getConfig().getString("skele_hp_multiplier"));
+        Config.CREEPER_FUSETIME = Float.valueOf(getConfig().getString("creeper_fusetime_multiplier"));
+    }
 
+    private boolean chunkContainsWall(Chunk ch){
+        return false;
     }
 }
