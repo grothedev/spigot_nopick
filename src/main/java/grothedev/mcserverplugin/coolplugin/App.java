@@ -28,6 +28,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -50,6 +51,9 @@ public class App extends JavaPlugin implements Listener
 
     Configuration conf;
     Random rand;
+    enum Side{
+        RIGHT, TOP, LEFT, BOTTOM
+    };
 
     @Override
     public void onEnable(){
@@ -57,8 +61,11 @@ public class App extends JavaPlugin implements Listener
         saveDefaultConfig();
         conf = getConfig();
         updateLocalConfig(conf);
+        Config.init();
         getServer().getPluginManager().registerEvents(this, this);
         rand = new Random();
+        getServer().getConsoleSender().sendMessage
+            ("banned items: " + Config.BANNED_ITEMS.toArray().toString());
     }
 
     @Override
@@ -70,7 +77,14 @@ public class App extends JavaPlugin implements Listener
     public void onEntityPickupItemEvent(EntityPickupItemEvent e){
             //LivingEntity entity, Item item, int remaining){
         if (e.getEntityType() == EntityType.PLAYER && 
-            isItemBanned(e.getItem())){
+            isItemBanned(e.getItem().getItemStack().getType())){
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onItemSpawnEvent(ItemSpawnEvent e){
+        if (e.getEntityType() == EntityType.DROPPED_ITEM && isItemBanned(e.getEntity().getItemStack().getType())){
             e.setCancelled(true);
         }
     }
@@ -105,8 +119,6 @@ public class App extends JavaPlugin implements Listener
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e){
         //Entity damagee, EntityDamageEvent.DamageCause cause, double damage){
         
-        getServer().broadcastMessage(e.getEntity() + "<*" + e.getDamager());
-
         if (e.getEntity() instanceof Player && e.getCause() == DamageCause.ENTITY_EXPLOSION){
             e.setDamage(e.getDamage()*.05f); //TODO cfg val
         } else if (e.getDamager().getType() == EntityType.SNOWBALL && e.getEntityType() == EntityType.CREEPER){
@@ -148,9 +160,30 @@ public class App extends JavaPlugin implements Listener
     public void onChunkLoadEvent(ChunkLoadEvent e){
         //chunk coords are chunk-based, not block-based
         if (e.isNewChunk()){
-            getServer().broadcastMessage(e.getChunk().getX() + ", " + e.getChunk().getZ());
-            if (chunkContainsWall(e.getChunk())){
-                //TODO
+           // getServer().broadcastMessage(e.getChunk().getX() + ", " + e.getChunk().getZ());
+            Side side = chunkContainsWall(e.getChunk(), 1000);
+            if (side != null){
+                Chunk ch = e.getChunk();
+                int w = 0; //coord, either x or z
+                switch (side){
+                    case RIGHT:
+                    case TOP:
+                        w = 1000%16;
+                        break;
+                    case BOTTOM:
+                    case LEFT:
+                        w = 16-1000%16;
+                        break;
+                }
+                for (int v = 0; v < 16; v++){
+                    for (int y = 0; y < 256; y++){
+                        if (side == Side.RIGHT || side == Side.LEFT){
+                            ch.getBlock(w, y, v).setType(getRandomStoneBlockMaterial());
+                        } else {
+                            ch.getBlock(v, y, w).setType(getRandomStoneBlockMaterial());
+                        }
+                    }
+                }            
             }
         }
     }
@@ -161,7 +194,6 @@ public class App extends JavaPlugin implements Listener
     public void onBlockBreakEvent(BlockBreakEvent e){
         if (e.getBlock().getType() == Material.GRASS_BLOCK || e.getBlock().getType() == Material.DIRT){
             e.setDropItems(rand.nextInt(100) < Config.DIRT_DROP_CHANCE*100);
-
         }
     }
 
@@ -169,42 +201,11 @@ public class App extends JavaPlugin implements Listener
     public void onWorldInitEvent(WorldInitEvent e){
         World w = e.getWorld();
         generateSquareBorderWall(1000, 6, w);
-        //world border generation
-        /*
-        Material blockMaterial = getRandomStoneBlockMaterial();
-        for (int x = -1006; x <= 1006; x++){ //top
-            for (int z = 1000; z <= 1006; z++){
-                for (int y = 1; y < 256; y++){
-                    w.getBlockAt(x, y, z).setType(blockMaterial);
-                }
-            }
-        }
-        for (int x = -1006; x <= -1000; x++){ //left
-            for (int z = -1006; z <= 1006; z++){
-                for (int y = 1; y < 256; y++){
-                    w.getBlockAt(x, y, z).setType(blockMaterial);
-                }
-            }
-        }
-        for (int x = -1006; x <= 1006; x++){ //bottom
-            for (int z = -1006; z <= -1000; z++){
-                for (int y = 1; y < 256; y++){
-                    w.getBlockAt(x, y, z).setType(blockMaterial);
-                }
-            }
-        }
-        for (int x = 1000; x <= 1006; x++){ //right
-            for (int z = -1006; z <= 1006; z++){
-                for (int y = 1; y < 256; y++){
-                    w.getBlockAt(x, y, z).setType(blockMaterial);
-                }
-            }
-        }*/
     }
 
     private Material getRandomStoneBlockMaterial(){
         
-        return types[rand.nextInt() % types.length];
+        return Config.WALL_BLOCK_TYPES_0[rand.nextInt(Config.WALL_BLOCK_TYPES_0.length-1)];
     }
 
     //TODO pass in a function that returns block type based on iteration# or location
@@ -240,10 +241,10 @@ public class App extends JavaPlugin implements Listener
         }
     }
 
-    private boolean isItemBanned(Item item){
+    private boolean isItemBanned(Material item){
         //return (item.getItemStack().getType().toString().toLowerCase().contains("sapling") 
-        return (item.getItemStack().getType() instanceof Sapling
-        || Config.BANNED_ITEMS.contains(item.getItemStack())); 
+        return (Config.BANNED_ITEMS.contains(item)
+                || item.toString().toLowerCase().contains("sapling")); 
     }
 
     private void updateLocalConfig(Configuration c){
@@ -253,7 +254,19 @@ public class App extends JavaPlugin implements Listener
         Config.CREEPER_FUSETIME = Float.valueOf(getConfig().getString("creeper_fusetime_multiplier"));
     }
 
-    private boolean chunkContainsWall(Chunk ch){
-        return false;
+    private Side chunkContainsWall(Chunk ch, int radius){
+        if (ch.getX() == radius/16){
+            return Side.RIGHT;
+        }
+        if (ch.getX() == -radius/16){
+            return Side.LEFT;
+        }
+        if (ch.getZ() == radius/16){
+            return Side.TOP;
+        }
+        if (ch.getZ() == radius/16){
+            return Side.BOTTOM;
+        }
+        return null;
     }
 }

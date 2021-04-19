@@ -1,3 +1,9 @@
+package grothedev.mcserverplugin.coolplugin;
+
+
+import java.util.HashSet;
+import org.bukkit.Material;
+
 public class Config{
     public static float CREEPER_BLAST;
     public static float DIRT_DROP_CHANCE;
@@ -21,8 +27,7 @@ public class Config{
     public static Material[] WALL_BLOCK_TYPES_1 = {};
     public static Material[] WALL_BLOCK_TYPES_2 = {};
 
-    public static HashSet<Material> BANNED_ITEMS = new HashSet<Material>();
-    {
+    public static void init(){
         BANNED_ITEMS.add(Material.CHARCOAL);
         BANNED_ITEMS.add(Material.BUCKET);
         BANNED_ITEMS.add(Material.IRON_PICKAXE);
@@ -31,6 +36,15 @@ public class Config{
         BANNED_ITEMS.add(Material.NETHERITE_PICKAXE);
         BANNED_ITEMS.add(Material.STONE_PICKAXE);
         BANNED_ITEMS.add(Material.WOODEN_PICKAXE);
-        
+        BANNED_ITEMS.add(Material.ACACIA_SAPLING);
+        BANNED_ITEMS.add(Material.BAMBOO_SAPLING);
+        BANNED_ITEMS.add(Material.BIRCH_SAPLING);
+        BANNED_ITEMS.add(Material.DARK_OAK_SAPLING);
+        BANNED_ITEMS.add(Material.JUNGLE_SAPLING);
+        BANNED_ITEMS.add(Material.LEGACY_SAPLING);
+        BANNED_ITEMS.add(Material.OAK_SAPLING);
+        BANNED_ITEMS.add(Material.SPRUCE_SAPLING);
+
     }
+    public static HashSet<Material> BANNED_ITEMS = new HashSet<Material>();
 }
