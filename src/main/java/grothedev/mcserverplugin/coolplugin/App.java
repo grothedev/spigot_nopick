@@ -172,7 +172,7 @@ public class App extends JavaPlugin implements Listener
                         break;
                     case BOTTOM:
                     case LEFT:
-                        w = 16-1000%16;
+                        w = -(1000%16);
                         break;
                 }
                 for (int v = 0; v < 16; v++){
@@ -255,16 +255,16 @@ public class App extends JavaPlugin implements Listener
     }
 
     private Side chunkContainsWall(Chunk ch, int radius){
-        if (ch.getX() == radius/16){
+        if (ch.getX() == radius/16 && ch.getZ() <= radius/16 && ch.getZ() >= -radius/16){
             return Side.RIGHT;
         }
-        if (ch.getX() == -radius/16){
+        if (ch.getX() == -radius/16 && ch.getZ() <= radius/16 && ch.getZ() >= -radius/16){
             return Side.LEFT;
         }
-        if (ch.getZ() == radius/16){
+        if (ch.getZ() == radius/16 && ch.getX() <= radius/16 && ch.getX() >= -radius/16){
             return Side.TOP;
         }
-        if (ch.getZ() == radius/16){
+        if (ch.getZ() == radius/16 && ch.getX() <= radius/16 && ch.getX() >= -radius/16){
             return Side.BOTTOM;
         }
         return null;
