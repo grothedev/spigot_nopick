@@ -2,3 +2,8 @@ main: grothedev.mcserverplugin.coolplugin.App
 name: CoolPlugin
 version: 0.1
 api-version: 1.16
+commands:
+  gm:
+    description: "toggle gamemode"
+    usage: "/<command>"
+    permission: "*"

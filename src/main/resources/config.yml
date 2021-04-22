@@ -1,4 +1,5 @@
-skele_hp_multiplier: .65
-creeper_blast_radius_multiplier: 3
-creeper_fusetime_multiplier: 3
-dirt_drop_chance: .2
+skele_hp_multiplier: ".65"
+creeper_blast_radius_multiplier: "3"
+creeper_fusetime_multiplier: "3"
+dirt_drop_chance: ".2"
+welcome_msg: "Welcome to the cool new gamemode, called BlastMiners for now until we come up with a better name. This is a temporary map until the server is officially released (on 4/23). You have creative gamemode temporarily. You can switch your gamemode with '/gm'. [More info on gamemode to be added to this message later]"

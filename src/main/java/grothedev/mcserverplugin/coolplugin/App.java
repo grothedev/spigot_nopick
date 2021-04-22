@@ -35,6 +35,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
 import org.bukkit.event.world.WorldInitEvent;
@@ -52,7 +53,8 @@ public class App extends JavaPlugin implements Listener
     Configuration conf;
     Random rand;
     enum Side{
-        RIGHT, TOP, LEFT, BOTTOM
+        RIGHT, TOP, LEFT, BOTTOM,
+        RIGHT_TOP, RIGHT_BOTTOM, LEFT_TOP, LEFT_BOTTOM
     };
 
     @Override
@@ -66,6 +68,7 @@ public class App extends JavaPlugin implements Listener
         rand = new Random();
         getServer().getConsoleSender().sendMessage
             ("banned items: " + Config.BANNED_ITEMS.toArray().toString());
+        this.getCommand("gm").setExecutor(new CommandHandler());
     }
 
     @Override
@@ -125,11 +128,10 @@ public class App extends JavaPlugin implements Listener
             Creeper c = ((Creeper)e.getEntity());
             if (c.getFuseTicks() <= 0){
                 c.ignite();
-                c.setMaxFuseTicks(c.getMaxFuseTicks()*3); //TODO cfg value
+                c.setMaxFuseTicks((int)(c.getMaxFuseTicks()*Config.CREEPER_FUSETIME));
             } else {
                 if (c.isPowered()){
-                    //? increaes fuse time or instant explode here?
-                    c.explode();
+                    c.setMaxFuseTicks((int)(c.getMaxFuseTicks()*Config.CREEPER_FUSETIME*.75f));
                 } else {
                     c.setPowered(true);
                 }
@@ -157,6 +159,13 @@ public class App extends JavaPlugin implements Listener
     }
 
     @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e){
+        Player p = e.getPlayer();
+        String msg = conf.getString("welcome_msg");
+        if (msg.length() > 0) p.sendMessage(msg);
+    }
+
+    @EventHandler
     public void onChunkLoadEvent(ChunkLoadEvent e){
         //chunk coords are chunk-based, not block-based
         if (e.isNewChunk()){
@@ -172,14 +181,17 @@ public class App extends JavaPlugin implements Listener
                         break;
                     case BOTTOM:
                     case LEFT:
-                        w = -(1000%16);
+                        w = 16-(1000%16);
                         break;
                 }
                 for (int v = 0; v < 16; v++){
                     for (int y = 0; y < 256; y++){
                         if (side == Side.RIGHT || side == Side.LEFT){
                             ch.getBlock(w, y, v).setType(getRandomStoneBlockMaterial());
-                        } else {
+                        } else if (side == Side.TOP || side == Side.BOTTOM){
+                            ch.getBlock(v, y, w).setType(getRandomStoneBlockMaterial());
+                        } else { //a corner
+                            ch.getBlock(w, y, v).setType(getRandomStoneBlockMaterial());
                             ch.getBlock(v, y, w).setType(getRandomStoneBlockMaterial());
                         }
                     }
@@ -255,18 +267,35 @@ public class App extends JavaPlugin implements Listener
     }
 
     private Side chunkContainsWall(Chunk ch, int radius){
+        if (ch.getX() == radius/16 && ch.getZ() == -radius/16){
+            return Side.RIGHT_TOP;
+        }
+        if (ch.getX() == radius/16 && ch.getZ() == radius/16){
+            return Side.RIGHT_BOTTOM;
+        }
+        if (ch.getX() == -radius/16 && ch.getZ() == -radius/16){
+            return Side.LEFT_TOP;
+        }
+        if (ch.getX() == radius/16 && ch.getZ() == -radius/16){
+            return Side.LEFT_BOTTOM;
+        }
         if (ch.getX() == radius/16 && ch.getZ() <= radius/16 && ch.getZ() >= -radius/16){
             return Side.RIGHT;
         }
         if (ch.getX() == -radius/16 && ch.getZ() <= radius/16 && ch.getZ() >= -radius/16){
             return Side.LEFT;
         }
-        if (ch.getZ() == radius/16 && ch.getX() <= radius/16 && ch.getX() >= -radius/16){
+        //damn video games and their reverse coordinates
+        if (ch.getZ() == -radius/16 && ch.getX() <= radius/16 && ch.getX() >= -radius/16){
             return Side.TOP;
         }
         if (ch.getZ() == radius/16 && ch.getX() <= radius/16 && ch.getX() >= -radius/16){
             return Side.BOTTOM;
         }
         return null;
+    }
+
+    private void generateBorder(){
+        
     }
 }
