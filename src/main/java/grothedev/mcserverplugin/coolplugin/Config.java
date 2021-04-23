@@ -30,12 +30,12 @@ public class Config{
     public static void init(){
         BANNED_ITEMS.add(Material.CHARCOAL);
         BANNED_ITEMS.add(Material.BUCKET);
-        BANNED_ITEMS.add(Material.IRON_PICKAXE);
-        BANNED_ITEMS.add(Material.DIAMOND_PICKAXE);
-        BANNED_ITEMS.add(Material.GOLDEN_PICKAXE);
-        BANNED_ITEMS.add(Material.NETHERITE_PICKAXE);
-        BANNED_ITEMS.add(Material.STONE_PICKAXE);
-        BANNED_ITEMS.add(Material.WOODEN_PICKAXE);
+        //BANNED_ITEMS.add(Material.IRON_PICKAXE);
+        //BANNED_ITEMS.add(Material.DIAMOND_PICKAXE);
+        //BANNED_ITEMS.add(Material.GOLDEN_PICKAXE);
+        //BANNED_ITEMS.add(Material.NETHERITE_PICKAXE);
+        //BANNED_ITEMS.add(Material.STONE_PICKAXE);
+        //BANNED_ITEMS.add(Material.WOODEN_PICKAXE);
         BANNED_ITEMS.add(Material.ACACIA_SAPLING);
         BANNED_ITEMS.add(Material.BAMBOO_SAPLING);
         BANNED_ITEMS.add(Material.BIRCH_SAPLING);
@@ -44,7 +44,15 @@ public class Config{
         BANNED_ITEMS.add(Material.LEGACY_SAPLING);
         BANNED_ITEMS.add(Material.OAK_SAPLING);
         BANNED_ITEMS.add(Material.SPRUCE_SAPLING);
-
+        BANNED_RECIPES.add(Material.CHARCOAL);
+        BANNED_RECIPES.add(Material.BUCKET);
+        BANNED_RECIPES.add(Material.IRON_PICKAXE);
+        BANNED_RECIPES.add(Material.DIAMOND_PICKAXE);
+        BANNED_RECIPES.add(Material.GOLDEN_PICKAXE);
+        BANNED_RECIPES.add(Material.NETHERITE_PICKAXE);
+        BANNED_RECIPES.add(Material.STONE_PICKAXE);
+        BANNED_RECIPES.add(Material.WOODEN_PICKAXE);
     }
     public static HashSet<Material> BANNED_ITEMS = new HashSet<Material>();
+    public static HashSet<Material> BANNED_RECIPES = new HashSet<Material>();
 }

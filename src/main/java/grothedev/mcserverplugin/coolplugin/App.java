@@ -66,8 +66,6 @@ public class App extends JavaPlugin implements Listener
         Config.init();
         getServer().getPluginManager().registerEvents(this, this);
         rand = new Random();
-        getServer().getConsoleSender().sendMessage
-            ("banned items: " + Config.BANNED_ITEMS.toArray().toString());
         this.getCommand("gm").setExecutor(new CommandHandler());
     }
 
@@ -95,7 +93,7 @@ public class App extends JavaPlugin implements Listener
     @EventHandler
     public void onCraftItemEvent(CraftItemEvent e){
         //Recipe r, InventoryView invView, InventoryType.SlotType type, int slot, ClickType c, InventoryAction a){
-        if (isItemBanned(e.getRecipe().getResult().getType())){
+        if (Config.BANNED_RECIPES.contains(e.getRecipe().getResult().getType())){
             e.setCancelled(true);
         }
     }
@@ -176,23 +174,47 @@ public class App extends JavaPlugin implements Listener
                 int w = 0; //coord, either x or z
                 switch (side){
                     case RIGHT:
-                    case TOP:
+                    case BOTTOM:
                         w = 1000%16;
                         break;
-                    case BOTTOM:
+                    case TOP:
                     case LEFT:
                         w = 16-(1000%16);
                         break;
+                    default:
+                        w = 1000%16;
+                        break;
                 }
-                for (int v = 0; v < 16; v++){
-                    for (int y = 0; y < 256; y++){
-                        if (side == Side.RIGHT || side == Side.LEFT){
-                            ch.getBlock(w, y, v).setType(getRandomStoneBlockMaterial());
-                        } else if (side == Side.TOP || side == Side.BOTTOM){
-                            ch.getBlock(v, y, w).setType(getRandomStoneBlockMaterial());
-                        } else { //a corner
-                            ch.getBlock(w, y, v).setType(getRandomStoneBlockMaterial());
-                            ch.getBlock(v, y, w).setType(getRandomStoneBlockMaterial());
+                for (int i = 0; i < 5; i++){
+                    w += i;
+                    for (int v = 0; v < 16; v++){
+                        for (int y = 0; y < 256; y++){
+                            switch (side){
+                                case RIGHT:
+                                case LEFT:
+                                    ch.getBlock(w, y, v).setType(getRandomStoneBlockMaterial());
+                                    break;
+                                case TOP:
+                                case BOTTOM:
+                                    ch.getBlock(v, y, w).setType(getRandomStoneBlockMaterial());
+                                    break;
+                                case LEFT_BOTTOM:
+                                    ch.getBlock(16-w, y, v).setType(getRandomStoneBlockMaterial());
+                                    ch.getBlock(16-v, y, w).setType(getRandomStoneBlockMaterial());
+                                    break;
+                                case RIGHT_BOTTOM:
+                                    ch.getBlock(w, y, v).setType(getRandomStoneBlockMaterial());
+                                    ch.getBlock(v, y, w).setType(getRandomStoneBlockMaterial());
+                                    break;
+                                case LEFT_TOP:
+                                    ch.getBlock(16-w, y, 16-v).setType(getRandomStoneBlockMaterial());
+                                    ch.getBlock(16-v, y, 16-w).setType(getRandomStoneBlockMaterial());
+                                    break;
+                                case RIGHT_TOP:
+                                    ch.getBlock(w, y, 16-v).setType(getRandomStoneBlockMaterial());
+                                    ch.getBlock(v, y, 16-w).setType(getRandomStoneBlockMaterial());
+                                    break;
+                            }
                         }
                     }
                 }            
@@ -211,8 +233,10 @@ public class App extends JavaPlugin implements Listener
 
     @EventHandler
     public void onWorldInitEvent(WorldInitEvent e){
-        World w = e.getWorld();
-        generateSquareBorderWall(1000, 6, w);
+        //NOTE: this isn't working i think because the plugin is loaded after the world
+        //getServer().broadcastMessage("WORLD INIT");
+        //World w = e.getWorld();
+        //generateSquareBorderWall(1000, 6, w);
     }
 
     private Material getRandomStoneBlockMaterial(){
@@ -267,16 +291,16 @@ public class App extends JavaPlugin implements Listener
     }
 
     private Side chunkContainsWall(Chunk ch, int radius){
-        if (ch.getX() == radius/16 && ch.getZ() == -radius/16){
+        if (ch.getX() == radius/16 && ch.getZ() == -(radius/16 - 1)){
             return Side.RIGHT_TOP;
         }
         if (ch.getX() == radius/16 && ch.getZ() == radius/16){
             return Side.RIGHT_BOTTOM;
         }
-        if (ch.getX() == -radius/16 && ch.getZ() == -radius/16){
+        if (ch.getX() == -(radius/16 - 1) && ch.getZ() == -(radius/16 - 1)){
             return Side.LEFT_TOP;
         }
-        if (ch.getX() == radius/16 && ch.getZ() == -radius/16){
+        if (ch.getX() == -(radius/16 - 1) && ch.getZ() == radius/16){
             return Side.LEFT_BOTTOM;
         }
         if (ch.getX() == radius/16 && ch.getZ() <= radius/16 && ch.getZ() >= -radius/16){
