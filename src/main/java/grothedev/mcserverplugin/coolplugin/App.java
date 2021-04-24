@@ -34,6 +34,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -157,12 +158,20 @@ public class App extends JavaPlugin implements Listener
     }
 
     @EventHandler
+    public void onFurnaceSmeltEvent(FurnaceSmeltEvent e){
+        if (e.getResult().getType() == Material.CHARCOAL){ //TODO use config
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
         String msg = conf.getString("welcome_msg");
         if (msg.length() > 0) p.sendMessage(msg);
     }
 
+    /* currently fucks up chunks for some reason
     @EventHandler
     public void onChunkLoadEvent(ChunkLoadEvent e){
         //chunk coords are chunk-based, not block-based
@@ -221,7 +230,7 @@ public class App extends JavaPlugin implements Listener
             }
         }
     }
-    
+    */
 
 
     @EventHandler
@@ -231,6 +240,7 @@ public class App extends JavaPlugin implements Listener
         }
     }
 
+    /*
     @EventHandler
     public void onWorldInitEvent(WorldInitEvent e){
         //NOTE: this isn't working i think because the plugin is loaded after the world
@@ -238,6 +248,7 @@ public class App extends JavaPlugin implements Listener
         //World w = e.getWorld();
         //generateSquareBorderWall(1000, 6, w);
     }
+    */
 
     private Material getRandomStoneBlockMaterial(){
         
